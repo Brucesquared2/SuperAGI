@@ -11,6 +11,7 @@ HUGGING_API_TOKEN: YOUR_HUGGING_FACE_API_TOKEN
 # to configure a local llm point your browser to 127.0.0.1:7860 and click on the model tab in text generation web ui.
 OPENAI_API_BASE: https://api.openai.com/v1
 #OPENAI_API_BASE: "http://super__tgwui:5001/v1"
+#OPENAI_API_BASE: "http://companion_litellm:4000/v1"
 
 # "gpt-3.5-turbo-0301": 4032, "gpt-4-0314": 8092, "gpt-3.5-turbo": 4032, "gpt-4": 8092, "gpt-4-32k": 32768, "gpt-4-32k-0314": 32768, "llama":2048, "mpt-7b-storywriter":45000
 MODEL_NAME: "gpt-3.5-turbo-0301"
@@ -123,3 +124,33 @@ ENGINE_ID: "stable-diffusion-xl-beta-v2-2-2"
 #QDRANT_HOST_NAME: YOUR_QDRANT_HOST_NAME
 #QDRANT_PORT: YOUR_QDRANT_PORT
 #GPU_LAYERS: GPU LAYERS THAT YOU WANT TO OFFLOAD TO THE GPU WHILE USING LOCAL LLMS
+
+#####################------------------COMPANION STACK-------------------------########################
+# Uncomment these if you are running docker-compose.companions.yml
+
+# LITELLM_MASTER_KEY: sk-local
+# OPENAI_API_BASE: "http://companion_litellm:4000/v1"
+# OPENAI_API_BASE: "http://companion_vllm:8000/v1"
+# VLLM_MODEL: "Qwen/Qwen2.5-VL-7B-Instruct"
+
+# RESOURCE_VECTOR_STORE: QDRANT
+# QDRANT_HOST_NAME: companion_qdrant
+# QDRANT_PORT: 6333
+
+# LANGFUSE_HOST: "http://companion_langfuse:3000"
+# LANGFUSE_PUBLIC_KEY: YOUR_LANGFUSE_PUBLIC_KEY
+# LANGFUSE_SECRET_KEY: YOUR_LANGFUSE_SECRET_KEY
+
+# UNSTRUCTURED_API_URL: "http://companion_unstructured:8000"
+# N8N_BASE_URL: "http://companion_n8n:5678"
+# POSTHOG_HOST: "http://companion_posthog:8000"
+# ARGILLA_API_URL: "http://companion_argilla:6900"
+# OPENWEBUI_URL: "http://companion_open_webui:8080"
+# OPENCLAW_URL: "http://companion_openclaw:3000"
+# OPENHANDS_URL: "http://companion_openhands:3000"
+# SEARXNG_URL: "http://companion_searxng:8080"
+
+# OMNICORE BRIDGE (Chart Analysis Toolkit)
+# OMNICORE_WEBHOOK_URL: "http://external-omnicore-endpoint/signals/chart"
+# OMNICORE_API_KEY: ""
+# OMNICORE_TIMEOUT_SECONDS: 15

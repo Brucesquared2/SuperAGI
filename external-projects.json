@@ -1,0 +1,69 @@
+{
+  "projects": [
+    {
+      "name": "aaw-complete",
+      "repo_url": "https://github.com/Brucesquared2/AAW-Complete.git",
+      "path": "x/aaw",
+      "branch": "main",
+      "enabled": true,
+      "setup_command": "npm install --prefix apps/web",
+      "run_command": "npm run dev --prefix apps/web"
+    },
+    {
+      "name": "omnicore",
+      "repo_url": "https://github.com/omnirexflora-labs/omnicoreagent.git",
+      "path": "external/omnicore",
+      "branch": "main",
+      "enabled": true
+    },
+    {
+      "name": "n8n",
+      "repo_url": "https://github.com/n8n-io/n8n.git",
+      "path": "external/n8n",
+      "branch": "master",
+      "enabled": true
+    },
+    {
+      "name": "open-webui",
+      "repo_url": "https://github.com/open-webui/open-webui.git",
+      "path": "external/open-webui",
+      "branch": "main",
+      "enabled": true
+    },
+    {
+      "name": "openclaw",
+      "repo_url": "https://github.com/openclaw/openclaw.git",
+      "path": "external/openclaw",
+      "branch": "main",
+      "enabled": true
+    },
+    {
+      "name": "langfuse",
+      "repo_url": "https://github.com/langfuse/langfuse.git",
+      "path": "external/langfuse",
+      "branch": "main",
+      "enabled": true
+    },
+    {
+      "name": "openhands",
+      "repo_url": "https://github.com/All-Hands-AI/OpenHands.git",
+      "path": "external/openhands",
+      "branch": "main",
+      "enabled": true
+    },
+    {
+      "name": "langgraph",
+      "repo_url": "https://github.com/langchain-ai/langgraph.git",
+      "path": "external/langgraph",
+      "branch": "main",
+      "enabled": false
+    },
+    {
+      "name": "autogen",
+      "repo_url": "https://github.com/microsoft/autogen.git",
+      "path": "external/autogen",
+      "branch": "main",
+      "enabled": false
+    }
+  ]
+}

@@ -1,0 +1,190 @@
+version: '3.8'
+
+services:
+  companion_vllm:
+    image: "${VLLM_IMAGE:-vllm/vllm-openai:latest}"
+    command:
+      - "--model"
+      - "${VLLM_MODEL:-Qwen/Qwen2.5-VL-7B-Instruct}"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8000"
+      - "--max-model-len"
+      - "${VLLM_MAX_MODEL_LEN:-8192}"
+    environment:
+      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN:-}
+    ports:
+      - "${VLLM_HOST_PORT:-8001}:8000"
+    networks:
+      - super_network
+    profiles:
+      - companions
+
+  companion_litellm:
+    image: "${LITELLM_IMAGE:-ghcr.io/berriai/litellm:main-latest}"
+    command: ["--config", "/app/litellm.config.yaml", "--port", "4000"]
+    volumes:
+      - ./litellm.config.yaml:/app/litellm.config.yaml:ro
+    ports:
+      - "4000:4000"
+    networks:
+      - super_network
+    profiles:
+      - companions
+
+  companion_qdrant:
+    image: "${QDRANT_IMAGE:-qdrant/qdrant:latest}"
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - companion_qdrant_data:/qdrant/storage
+    networks:
+      - super_network
+    profiles:
+      - companions
+
+  companion_unstructured:
+    image: "${UNSTRUCTURED_IMAGE:-downloads.unstructured.io/unstructured-io/unstructured-api:latest}"
+    ports:
+      - "8008:8000"
+    networks:
+      - super_network
+    profiles:
+      - companions
+
+  companion_n8n:
+    image: "${N8N_IMAGE:-n8nio/n8n:latest}"
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://localhost:5678/
+    volumes:
+      - companion_n8n_data:/home/node/.n8n
+    networks:
+      - super_network
+    profiles:
+      - companions
+
+  companion_open_webui:
+    image: "${OPEN_WEBUI_IMAGE:-ghcr.io/open-webui/open-webui:main}"
+    ports:
+      - "8080:8080"
+    environment:
+      - WEBUI_AUTH=False
+    volumes:
+      - companion_open_webui_data:/app/backend/data
+    networks:
+      - super_network
+    profiles:
+      - companions
+
+  companion_langfuse:
+    image: "${LANGFUSE_IMAGE:-langfuse/langfuse:latest}"
+    ports:
+      - "${LANGFUSE_HOST_PORT:-3011}:3000"
+    environment:
+      - NEXTAUTH_URL=http://localhost:${LANGFUSE_HOST_PORT:-3011}
+      - NEXTAUTH_SECRET=${LANGFUSE_NEXTAUTH_SECRET:-change-me-langfuse-secret}
+      - DATABASE_URL=${LANGFUSE_DATABASE_URL:-postgresql://superagi:password@super__postgres:5432/super_agi_main}
+      - SALT=${LANGFUSE_SALT:-change-me-langfuse-salt}
+      - ENCRYPTION_KEY=${LANGFUSE_ENCRYPTION_KEY:-change-me-langfuse-encryption-key}
+    depends_on:
+      - super__postgres
+    networks:
+      - super_network
+    profiles:
+      - companions
+
+  companion_posthog:
+    image: "${POSTHOG_IMAGE:-posthog/posthog:latest}"
+    ports:
+      - "8009:8000"
+    environment:
+      - SECRET_KEY=${POSTHOG_SECRET_KEY:-change-me-posthog-secret}
+      - DATABASE_URL=${POSTHOG_DATABASE_URL:-postgres://superagi:password@super__postgres:5432/super_agi_main}
+      - REDIS_URL=${POSTHOG_REDIS_URL:-redis://super__redis:6379}
+      - DISABLE_SECURE_SSL_REDIRECT=true
+      - IS_BEHIND_PROXY=true
+      - SITE_URL=http://localhost:8009
+    depends_on:
+      - super__postgres
+      - super__redis
+    networks:
+      - super_network
+    profiles:
+      - companions
+
+  companion_argilla:
+    image: "${ARGILLA_IMAGE:-argilla/argilla-server:latest}"
+    ports:
+      - "6900:6900"
+    environment:
+      - ARGILLA_HOME_PATH=/var/lib/argilla
+      - ARGILLA_ENABLE_TELEMETRY=false
+      - ARGILLA_SERVER_URL=http://localhost:6900
+    volumes:
+      - companion_argilla_data:/var/lib/argilla
+    networks:
+      - super_network
+    profiles:
+      - companions
+
+  companion_openclaw:
+    image: "${OPENCLAW_IMAGE:-ghcr.io/openclaw/openclaw:latest}"
+    ports:
+      - "3100:3000"
+    environment:
+      - OPENAI_BASE_URL=${OPENCLAW_OPENAI_BASE_URL:-http://companion_litellm:4000/v1}
+      - OPENAI_API_KEY=${OPENCLAW_OPENAI_API_KEY:-sk-local}
+    networks:
+      - super_network
+    profiles:
+      - companions
+
+  companion_openhands:
+    image: "${OPENHANDS_IMAGE:-docker.all-hands.dev/all-hands-ai/openhands:latest}"
+    ports:
+      - "${OPENHANDS_HOST_PORT:-3001}:3000"
+    environment:
+      - LLM_BASE_URL=${OPENHANDS_LLM_BASE_URL:-http://companion_litellm:4000/v1}
+      - LLM_API_KEY=${OPENHANDS_LLM_API_KEY:-sk-local}
+      - SANDBOX_RUNTIME_CONTAINER_IMAGE=${OPENHANDS_RUNTIME_IMAGE:-docker.all-hands.dev/all-hands-ai/runtime:0.46-nikolaik}
+      - SANDBOX_USER_ID=${OPENHANDS_SANDBOX_UID:-1000}
+      - SANDBOX_VOLUMES=${OPENHANDS_SANDBOX_VOLUMES:-/opt/workspace_base:/workspace:rw}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./workspace:/opt/workspace_base
+      - companion_openhands_state:/.openhands-state
+    depends_on:
+      - companion_litellm
+    networks:
+      - super_network
+    profiles:
+      - companions
+
+  companion_searxng:
+    image: "${SEARXNG_IMAGE:-searxng/searxng:latest}"
+    ports:
+      - "${SEARXNG_HOST_PORT:-8088}:8080"
+    environment:
+      - BASE_URL=${SEARXNG_BASE_URL:-http://localhost:8088/}
+    volumes:
+      - companion_searxng_data:/etc/searxng
+    networks:
+      - super_network
+    profiles:
+      - companions
+
+volumes:
+  companion_qdrant_data:
+  companion_n8n_data:
+  companion_open_webui_data:
+  companion_argilla_data:
+  companion_openhands_state:
+  companion_searxng_data:

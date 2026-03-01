@@ -138,8 +138,37 @@ cd SuperAGI
       docker compose -f docker-compose-gpu.yml up --build
       ```
 
+  c. To run SuperAGI with companion services (LiteLLM, Langfuse, Qdrant, Unstructured, n8n, PostHog, Argilla, Open WebUI, OpenClaw, OpenHands, SearXNG):
+    ```
+    docker compose -f docker-compose.yaml -f docker-compose.companions.yml --profile companions up --build
+    ```
+
 
 6. Open your web browser and navigate to http://localhost:3000 to access SuperAGI.
+
+### 🔌 Companion Services
+
+When `docker-compose.companions.yml` is enabled, the following endpoints are available locally:
+
+- SuperAGI: http://localhost:3000
+- LiteLLM Gateway: http://localhost:4000
+- Langfuse: http://localhost:3011
+- Qdrant: http://localhost:6333
+- Unstructured API: http://localhost:8008
+- n8n: http://localhost:5678
+- PostHog: http://localhost:8009
+- Argilla: http://localhost:6900
+- Open WebUI: http://localhost:8080
+- OpenClaw: http://localhost:3100
+- OpenHands: http://localhost:3001
+- SearXNG: http://localhost:8088
+
+For SuperAGI to use the companion LLM/vector stack, copy `config_template.yaml` to `config.yaml` and set:
+
+- `OPENAI_API_BASE: "http://companion_litellm:4000/v1"`
+- `RESOURCE_VECTOR_STORE: QDRANT`
+- `QDRANT_HOST_NAME: companion_qdrant`
+- `QDRANT_PORT: 6333`
 
 #### 🌀 Digital Ocean
 
