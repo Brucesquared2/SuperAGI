@@ -10,6 +10,7 @@ from superagi.vector_store import qdrant
 from superagi.vector_store.redis import Redis
 from superagi.vector_store.embedding.openai import OpenAiEmbedding
 from superagi.vector_store.qdrant import Qdrant
+from superagi.vector_store.antigravity import Antigravity
 
 
 class VectorFactory:
@@ -80,6 +81,9 @@ class VectorFactory:
             redis.create_index()
             return redis
 
+        if vector_store == VectorStoreType.ANTIGRAVITY:
+            return Antigravity(index_name, embedding_model)
+
         raise ValueError(f"Vector store {vector_store} not supported")
     
     @classmethod
@@ -108,3 +112,6 @@ class VectorFactory:
                 return weaviate.Weaviate(client, embedding_model, index_name)
             except:
                 raise ValueError("Weaviate API key not found")
+
+        if vector_store == VectorStoreType.ANTIGRAVITY:
+            return Antigravity(index_name, embedding_model)
