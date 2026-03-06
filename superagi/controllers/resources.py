@@ -12,7 +12,8 @@ from fastapi_jwt_auth import AuthJWT
 from fastapi_sqlalchemy import db
 
 from superagi.config.config import get_config
-from superagi.helper.auth import check_auth
+from superagi.helper.auth import check_auth, get_user_organisation
+from superagi.models.organisation import Organisation
 from superagi.helper.resource_helper import ResourceHelper
 from superagi.lib.logger import logger
 from superagi.models.agent import Agent
@@ -117,13 +118,13 @@ def get_all_resources(agent_id: int,
 
 @router.get("/get/{resource_id}", status_code=200)
 def download_file_by_id(resource_id: int,
-                        Authorize: AuthJWT = Depends(check_auth)):
+                        organisation: Organisation = Depends(get_user_organisation)):
     """
     Download a particular resource by resource_id.
 
     Args:
         resource_id (int): ID of the resource.
-        Authorize (AuthJWT, optional): Authorization dependency.
+        organisation (Organisation): The organisation of the authenticated user.
 
     Returns:
         StreamingResponse: Streaming response for downloading the resource.
@@ -134,9 +135,6 @@ def download_file_by_id(resource_id: int,
         HTTPException (status_code=404): If the file is not found.
 
     """
-    # Get current user's organization_id from JWT token
-    current_user_org_id = Authorize.get_jwt_subject()
-
     # First check if resource exists
     resource = db.session.query(Resource).filter(Resource.id == resource_id).first()
     if not resource:
@@ -148,7 +146,8 @@ def download_file_by_id(resource_id: int,
         raise HTTPException(status_code=400, detail="Associated agent not found!")
 
     # Verify the authenticated user belongs to the same organization as the agent
-    if str(agent.organisation_id) != str(current_user_org_id):
+    agent_organisation = agent.get_agent_organisation(db.session)
+    if not agent_organisation or agent_organisation.id != organisation.id:
         raise HTTPException(status_code=403, detail="You don't have permission to access this resource")
 
     download_file_path = resource.path
